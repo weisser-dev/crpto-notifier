@@ -1,0 +1,8 @@
+*.hg/*
+*/.settings/*
+*/target/*
+
+*.classpath
+*.project
+*.log
+/target/
