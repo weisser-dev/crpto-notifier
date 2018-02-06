@@ -1,7 +1,8 @@
 package cryptodealer;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -14,18 +15,18 @@ import com.google.gson.Gson;
 import cryptodealer.exchanges.Exchange;
 
 @Path("/")
-public class SuggestionServlet {
+public class CurrenciesServlet {
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public String suggestions(@QueryParam("exchange") String exchangeName) {
+	public String currencies(@QueryParam("exchange") String exchangeName) {
 
-		List<Suggestion> suggestions = new ArrayList<>();
+		Map<String, List<String>> currencies = new HashMap<>();
 
 		for (Exchange exchange : ExchangeFactory.ensureExchanges(exchangeName)) {
-			suggestions.addAll(Suggestor.loadSuggestions(exchange));
+			currencies.put(exchange.name(), exchange.currencies());
 		}
 
-		return new Gson().toJson(suggestions);
+		return new Gson().toJson(currencies);
 	}
 }

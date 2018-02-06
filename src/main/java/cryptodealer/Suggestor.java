@@ -37,7 +37,7 @@ public class Suggestor {
 		for (String currency : exchange.currencies()) {
 			String symbol = exchange.symbol(currency);
 
-			List<Candle> candles = exchange.candles(symbol, interval, null, null);
+			List<Candle> candles = exchange.candles(symbol, interval, 50, null);
 			List<Pair<Double, Double>> emas = new CandleToEMAMapper().mapAll(candles);
 
 			EMAUpCrossoverCondition crossoverCondition = new EMAUpCrossoverCondition(emas);
@@ -49,7 +49,7 @@ public class Suggestor {
 			if (crossover && idled) {
 				int idleCandles = belowCondition.getCount();
 
-				String reason = interval.getId() + " candle EMA crossover and came from  " + idleCandles
+				String reason = interval.getId() + " candle EMA crossover and came from " + idleCandles
 						+ " negative bars";
 
 				Suggestion suggestion = new Suggestion(exchange.name(), symbol, interval.getId(), idleCandles, reason);

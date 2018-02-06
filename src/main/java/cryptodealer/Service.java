@@ -15,7 +15,7 @@ public class Service {
 		ServletContextHandler context = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
 		context.setContextPath("/");
 
-		Server server = new Server(8080);
+		Server server = new Server(31337);
 		server.setHandler(context);
 
 		registerServletsV1(context);
@@ -26,6 +26,7 @@ public class Service {
 	private static void registerServletsV1(ServletContextHandler context) {
 
 		Map<String, Class<?>> mappings = new HashMap<>();
+		mappings.put("currencies", CurrenciesServlet.class);
 		mappings.put("suggestions", SuggestionServlet.class);
 
 		registerServlets(context, "v1", mappings);
