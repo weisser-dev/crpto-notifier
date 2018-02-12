@@ -52,7 +52,8 @@ public class Suggestor {
 				String reason = interval.getId() + " candle EMA crossover and came from " + idleCandles
 						+ " negative bars";
 
-				Suggestion suggestion = new Suggestion(exchange.name(), symbol, interval.getId(), idleCandles, reason);
+				Suggestion suggestion = new Suggestion(exchange.name(), currency, interval.getId(), idleCandles,
+						reason);
 
 				suggestions.add(suggestion);
 			}

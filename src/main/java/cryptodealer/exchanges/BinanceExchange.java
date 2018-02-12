@@ -33,13 +33,14 @@ public class BinanceExchange implements Exchange {
 	public List<String> currencies() {
 
 		return this.client.getExchangeInfo().getSymbols().stream().map((s) -> s.getSymbol())
-				.filter((s) -> s.endsWith("BTC")).collect(Collectors.toList());
+				.filter((s) -> s.endsWith("BTC")).map((s) -> s.substring(0, s.length() - 3))
+				.collect(Collectors.toList());
 	}
 
 	@Override
 	public String symbol(String currency) {
 
-		return currency;
+		return currency + "BTC";
 	}
 
 	@Override
