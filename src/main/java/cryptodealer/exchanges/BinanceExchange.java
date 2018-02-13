@@ -50,8 +50,6 @@ public class BinanceExchange implements Exchange {
 
 		if (Interval.MINUTES_5 == interval) {
 			intervalImpl = CandlestickInterval.FIVE_MINUTES;
-		} else if (Interval.MINUTES_15 == interval) {
-			intervalImpl = CandlestickInterval.FIFTEEN_MINUTES;
 		} else if (Interval.HOUR_1 == interval) {
 			intervalImpl = CandlestickInterval.HOURLY;
 		} else if (Interval.DAY_1 == interval) {

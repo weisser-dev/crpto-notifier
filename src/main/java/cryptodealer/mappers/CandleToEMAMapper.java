@@ -10,8 +10,8 @@ public class CandleToEMAMapper implements Mapper<Candle, Pair<Double, Double>> {
 
 	public CandleToEMAMapper() {
 
-		this.emaShort = new EMA(5);
-		this.emaLong = new EMA(20);
+		this.emaShort = new EMA(9);
+		this.emaLong = new EMA(26);
 	}
 
 	@Override

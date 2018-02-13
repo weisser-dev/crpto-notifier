@@ -5,7 +5,6 @@ import java.util.concurrent.TimeUnit;
 public enum Interval {
 
 	MINUTES_5("5m", TimeUnit.MINUTES.toMillis(5)), //
-	MINUTES_15("15m", TimeUnit.MINUTES.toMillis(15)), //
 	HOUR_1("1h", TimeUnit.HOURS.toMillis(1)), //
 	DAY_1("1d", TimeUnit.DAYS.toMillis(1));
 

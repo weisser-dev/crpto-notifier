@@ -1,11 +1,9 @@
 package cryptodealer;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
-import cryptodealer.conditions.EMAIdledBelowCondition;
 import cryptodealer.conditions.EMAUpCrossoverCondition;
 import cryptodealer.exchanges.Exchange;
 import cryptodealer.mappers.CandleToEMAMapper;
@@ -16,23 +14,12 @@ public class Suggestor {
 	public static List<Suggestion> loadSuggestions(Exchange exchange) {
 
 		List<Suggestion> suggestions = new ArrayList<>();
-		loadSuggestions(exchange, Interval.MINUTES_15, suggestions);
-
-		Collections.sort(suggestions, new Comparator<Suggestion>() {
-
-			@Override
-			public int compare(Suggestion o1, Suggestion o2) {
-
-				return o1.idleCandles - o2.idleCandles;
-			}
-		});
+		loadSuggestions(exchange, Interval.HOUR_1, suggestions);
 
 		return suggestions;
 	}
 
 	private static void loadSuggestions(Exchange exchange, Interval interval, List<Suggestion> suggestions) {
-
-		final int IDLE_BARS = 5;
 
 		for (String currency : exchange.currencies()) {
 			String symbol = exchange.symbol(currency);
@@ -41,19 +28,16 @@ public class Suggestor {
 			List<Pair<Double, Double>> emas = new CandleToEMAMapper().mapAll(candles);
 
 			EMAUpCrossoverCondition crossoverCondition = new EMAUpCrossoverCondition(emas);
-			EMAIdledBelowCondition belowCondition = new EMAIdledBelowCondition(emas, IDLE_BARS);
 
 			boolean crossover = crossoverCondition.matches();
-			boolean idled = belowCondition.matches();
 
-			if (crossover && idled) {
-				int idleCandles = belowCondition.getCount();
+			if (crossover) {
+				Candle candle = candles.get(candles.size() - 1);
+				String reason = interval.getId() + " candle EMA crossover";
+				BigDecimal price = candle.close;
 
-				String reason = interval.getId() + " candle EMA crossover and came from " + idleCandles
-						+ " negative bars";
-
-				Suggestion suggestion = new Suggestion(exchange.name(), currency, interval.getId(), idleCandles,
-						reason);
+				Suggestion suggestion = new Suggestion(exchange.name(), currency, price.toPlainString(),
+						String.valueOf(candle.openTime), String.valueOf(candle.closeTime), interval.getId(), reason);
 
 				suggestions.add(suggestion);
 			}
