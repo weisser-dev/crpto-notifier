@@ -10,7 +10,7 @@ import com.binance.api.client.domain.market.Candlestick;
 import com.binance.api.client.domain.market.CandlestickInterval;
 
 import cryptodealer.Candle;
-import cryptodealer.Interval;
+import cryptodealer.Currency;
 
 public class BinanceExchange implements Exchange {
 
@@ -30,35 +30,28 @@ public class BinanceExchange implements Exchange {
 	}
 
 	@Override
-	public List<String> currencies() {
+	public List<String> currencies(String baseCurrency) {
 
 		return this.client.getExchangeInfo().getSymbols().stream().map((s) -> s.getSymbol())
-				.filter((s) -> s.endsWith("BTC")).map((s) -> s.substring(0, s.length() - 3))
+				.filter((s) -> s.endsWith(baseCurrency)).map((s) -> s.substring(0, s.length() - baseCurrency.length()))
 				.collect(Collectors.toList());
 	}
 
 	@Override
-	public String symbol(String currency) {
-
-		return currency + "BTC";
+	public String symbol(String baseCurrency, String currency) {
+		
+		return currency + baseCurrency;
 	}
 
 	@Override
-	public List<Candle> candles(String symbol, Interval interval, Integer limit, Long endTime) {
-
-		CandlestickInterval intervalImpl = null;
-
-		if (Interval.MINUTES_5 == interval) {
-			intervalImpl = CandlestickInterval.FIVE_MINUTES;
-		} else if (Interval.HOUR_1 == interval) {
-			intervalImpl = CandlestickInterval.HOURLY;
-		} else if (Interval.DAY_1 == interval) {
-			intervalImpl = CandlestickInterval.DAILY;
+	public List<Candle> candles(String symbol, String interval, Integer limit, Long endTime) {
+		for (CandlestickInterval candlestickInterval : CandlestickInterval.values()) {
+			if(candlestickInterval.getIntervalId().equals(interval)) {
+				List<Candlestick> candlesticks = this.client.getCandlestickBars(symbol, candlestickInterval, limit, null, endTime);
+				return candlesticks.stream().map(this::convert).collect(Collectors.toList());
+			}
 		}
-
-		List<Candlestick> candlesticks = this.client.getCandlestickBars(symbol, intervalImpl, limit, null, endTime);
-
-		return candlesticks.stream().map(this::convert).collect(Collectors.toList());
+		return null;
 	}
 
 	private Candle convert(Candlestick candlestick) {

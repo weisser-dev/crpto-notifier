@@ -7,12 +7,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import cryptodealer.Candle;
-import cryptodealer.Interval;
 
 public class PoloniexExchange implements Exchange {
 
@@ -23,7 +23,7 @@ public class PoloniexExchange implements Exchange {
 	}
 
 	@Override
-	public List<String> currencies() {
+	public List<String> currencies(String baseCurrency) {
 
 		List<String> symbols = new ArrayList<>();
 
@@ -56,20 +56,39 @@ public class PoloniexExchange implements Exchange {
 	}
 
 	@Override
-	public String symbol(String currency) {
+	public String symbol(String baseCurrency, String currency) {
 
-		return "BTC_" + currency;
+		return baseCurrency + "_" + currency;
 	}
 
 	@Override
-	public List<Candle> candles(String symbol, Interval interval, Integer limit, Long endTime) {
+	public List<Candle> candles(String symbol, String interval, Integer limit, Long endTime) {
 
 		long endSeconds = System.currentTimeMillis() / 1000;
-		long rangeSeconds = interval.getMillis() * 500 / 1000;
-		long beginSeconds = endSeconds - rangeSeconds;
+		long rangeSeconds = 0;
+		if(interval.endsWith("m")) {
+			interval = interval.replaceAll("\\D+", "");
+			// 1m not available on Poloniex
+			if(interval.equals("1")) {
+				return null;
+			}
+			rangeSeconds = TimeUnit.MINUTES.toMillis(Long.valueOf(interval));
+		} else if(interval.endsWith("h")) {
+			interval = interval.replaceAll("\\D+", "");
+			// 1h not available on Poloniex
+			if(interval.equals("1")) {
+				return null;
+			}
+			rangeSeconds = TimeUnit.HOURS.toMillis(Long.valueOf(interval));
+		} else if(interval.endsWith("d")) {
+			interval = interval.replaceAll("\\D+", "");
+			rangeSeconds = TimeUnit.DAYS.toMillis(Long.valueOf(interval));
+		}
+		
+		long beginSeconds = endSeconds - rangeSeconds * 500 / 1000;
 
 		String str = "https://poloniex.com/public?command=returnChartData&currencyPair=" + symbol + "&start="
-				+ beginSeconds + "&period=" + interval.getMillis() / 1000;
+				+ beginSeconds + "&period=" + rangeSeconds / 1000;
 
 		try {
 			URL url = new URL(str);
@@ -84,7 +103,7 @@ public class PoloniexExchange implements Exchange {
 			for (Map<String, Object> map : wrappers) {
 				Candle candle = new Candle();
 				candle.openTime = Long.parseLong(map.get("date").toString()) * 1000;
-				candle.closeTime = Long.parseLong(map.get("date").toString()) * 1000;
+				candle.closeTime = Long.parseLong(map.get("date").toString()) * 1000 + rangeSeconds - 1;
 				candle.high = new BigDecimal(map.get("high").toString());
 				candle.low = new BigDecimal(map.get("low").toString());
 				candle.open = new BigDecimal(map.get("open").toString());

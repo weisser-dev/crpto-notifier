@@ -23,8 +23,11 @@ public class CurrenciesServlet {
 
 		Map<String, List<String>> currencies = new HashMap<>();
 
+		
 		for (Exchange exchange : ExchangeFactory.ensureExchanges(exchangeName)) {
-			currencies.put(exchange.name(), exchange.currencies());
+			for(Currency currency : Currency.values()) {
+				currencies.put(exchange.name() + "_" + currency.getId(), exchange.currencies(currency.getId()));
+			}
 		}
 
 		return new Gson().toJson(currencies);
