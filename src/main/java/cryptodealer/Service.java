@@ -2,6 +2,9 @@ package cryptodealer;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -10,11 +13,18 @@ import org.glassfish.jersey.servlet.ServletContainer;
 
 public class  Service {
 
+	public final static Logger LOGGER = Logger.getLogger(Service.class.getName());
+	public static FileHandler fileHandler;
+	
 	public static void main(String[] args) throws Exception {
 
 		ServletContextHandler context = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
 		context.setContextPath("/");
 
+		fileHandler = new FileHandler("notifier.log");
+		LOGGER.addHandler(fileHandler);
+		
+		
 		Server server = new Server(31337);
 		server.setHandler(context);
 
